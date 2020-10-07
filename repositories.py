@@ -13,21 +13,26 @@ class Repository:
             first:100,
             ) {{
             pageInfo {{
-                startCursor
                 endCursor
-                hasPreviousPage
                 hasNextPage
             }}
             edges {{
                 node {{
                 ... on Repository {{
                     nameWithOwner
+                    createdAt
+                    releases {{
+                        totalCount
+                    }}
                     primaryLanguage {{
                     name
                     }}
-                    stargazers {{
-                    totalCount
+                    stargazerCount
+                    watchers {{
+                        totalCount
                     }}
+                    forkCount
+                    url
                 }}
                 }}
             }}
@@ -38,12 +43,11 @@ class Repository:
 
     def get_repositories(self, primaryLanguage, num_repositories):
         headers = headers = {'Authorization': f'Bearer {self.token}'}
-        repositories = list()
         query = self.__get_query(primaryLanguage)
         result = requests.post("https://api.github.com/graphql", json={'query': query}, headers=headers)
         if result.status_code == 200:
             data = result.json()['data']['search']
             repositories = list(map(lambda x: x['node'], data['edges']))
-            print(f"\rRetrieve {len(repositories)} repositories", end = '')
-            return repositories 
+            print(f"\rRetrieve {len(repositories)} repositories")
+            return repositories
             
